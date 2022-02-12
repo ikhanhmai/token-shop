@@ -25,14 +25,15 @@ contract AIOnebox{
     }
     
     function buy_AOB() public payable{
-        require(buy_active==true, "[001] AOB is not for sell right this time.");
+        require(buy_active==true, "[001] AOB is not for buy right this time.");
         require(msg.value>=minimum_buy_AOB, "[002] You can not buy less 10 ODB (0.001 eth)"); 
         require(msg.value*buy_ratio_AOB<= token_AOB.balanceOf(address(this)), "[003] We dont have enought AOB to sell right");
         token_AOB.transfer(msg.sender, msg.value*buy_ratio_AOB);
     }
     
     function sell_AOB(uint amount) public{
-        require(amount>=minimum_sell_AOB, "[006]Luong AOB can ban phai > 100 token");
+        require(sell_active==true, "[003] AOB is not for sell right this time.");
+        require(amount>=minimum_sell_AOB, "[006] Minium token is invalid.");
         require(token_AOB.allowance(msg.sender, address(this))>= amount, "[007] AIOneBox has not permission to transfer you AOB");
         require(token_AOB.balanceOf(msg.sender)>=amount, "[008] You dont have AOB enought to sell.");
         require(address(this).balance>amount/sell_ratio_AOB, "[009] Sorry, we dont have enought ETH to sell right this time");
@@ -50,6 +51,14 @@ contract AIOnebox{
         sell_ratio_AOB = newRatio;
     }
     
+    function update_buy_status(bool newStatus) public checkMaster{
+        buy_active = newStatus;
+    }
+
+    function update_sell_status(bool newStatus) public checkMaster{
+        sell_active = newStatus;
+    }    
+
     function withdrawETH_All() public checkMaster{
         payable(owner).transfer(address(this).balance);
     }
